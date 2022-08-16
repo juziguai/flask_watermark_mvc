@@ -1,74 +1,25 @@
+import json
+import jsonpath
+import re
+import requests
+import sys
 import time
-from datetime import datetime
+
 from flask import render_template, request
+
 from run import app
-from wxcloudrun.dao import delete_counterbyid, query_counterbyid, insert_counter, update_counterbyid
-from wxcloudrun.model import Counters
-from wxcloudrun.response import make_succ_empty_response, make_succ_response, make_err_response
 from wxcloudrun import tools
-import re,requests,sys,json,jsonpath
 
 # 创建工具变量
 User_Agent = tools.User_Agent
 
-@app.route('/')
+
+@app.route ( '/' )
 def index():
     """
     :return: 返回index页面
     """
-    return render_template('index.html')
-
-
-@app.route('/api/count', methods=['POST'])
-def count():
-    """
-    :return:计数结果/清除结果
-    """
-
-    # 获取请求体参数
-    params = request.get_json()
-
-    # 检查action参数
-    if 'action' not in params:
-        return make_err_response('缺少action参数')
-
-    # 按照不同的action的值，进行不同的操作
-    action = params['action']
-
-    # 执行自增操作
-    if action == 'inc':
-        counter = query_counterbyid(1)
-        if counter is None:
-            counter = Counters()
-            counter.id = 1
-            counter.count = 1
-            counter.created_at = datetime.now()
-            counter.updated_at = datetime.now()
-            insert_counter(counter)
-        else:
-            counter.id = 1
-            counter.count += 1
-            counter.updated_at = datetime.now()
-            update_counterbyid(counter)
-        return make_succ_response(counter.count)
-
-    # 执行清0操作
-    elif action == 'clear':
-        delete_counterbyid(1)
-        return make_succ_empty_response()
-
-    # action参数错误
-    else:
-        return make_err_response('action参数错误')
-
-
-@app.route('/api/count', methods=['GET'])
-def get_count():
-    """
-    :return: 计数的值
-    """
-    counter = Counters.query.filter(Counters.id == 1).first()
-    return make_succ_response(0) if counter is None else make_succ_response(counter.count)
+    return render_template ( 'index.html' )
 
 
 @app.route ( '/movie' )
@@ -136,23 +87,27 @@ def movie():
     response = requests.get ( url=ret, headers=headers )
     # 将响应内容存储存为变量
     vodeo = response.content
-    if  vodeo:
-        print('下载成功！')
+    if vodeo:
+        print ( '下载成功！' )
+        aa = 0
     else:
-        print("下载失败！")
+        print ( "下载失败！" )
+        aa = 1
     # 3、持久化保存，可保存本地 OR 数据库
     # 设置保存文件路径及变量名
     # # 设置时间戳
     timec = int ( time.time () )
-    fileName = 'static/movie/' + str ( timec ) + '.mp4'
+    movie_id = str ( timec ) + '.mp4'
+    fileName = 'wxcloudrun/static/movie/' + movie_id
 
     # 进行IO操作，进行W类型，保存文件位置及保存文件的编码格式
     with open ( fileName, 'wb' ) as fp:
         fp.write ( vodeo )
-
+    movie_code = 1
     # 打印文件信息
     print ( '视频保存成功！路径为', fileName )
-    return render_template ( 'index.html', movie=fileName )
+    print ( '传递的视频ID为', movie_id )
+    return render_template ( 'index.html', movie=movie_id,movie_code = movie_code,aa = aa )
 
     # 3、持久化保存，保存成文件 or 写入数据库
     # respones_max_JSON = response.json()
@@ -161,7 +116,7 @@ def movie():
     # print('JSON文件保存成功！文件地址为', '文件名称为：')
 
 
-@app.route ( '/test' )
+@app.route ( '/test', methods=['GET'] )
 def test():  # put application's code here
     # return 'Hello World!'
     movies = 'static/movie/test.mp4'
