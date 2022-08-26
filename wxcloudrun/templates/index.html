@@ -156,7 +156,7 @@
     {#        <a class="btn btn-success btn-lg count-button" style="background: #07c160; border: 0"#}
     {#           onclick="set('inc')">提交</a>#}
     {#    </div>#}
-    <form action="/movie" method="get">
+    <form action="/api/movie" method="get">
         {% if aa == 0 %}
             <video width="400" height="300" controls="controls">
                 <source src="static/movie/{{ movie|safe }}" type="video/mp4"/>

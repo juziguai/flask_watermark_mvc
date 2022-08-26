@@ -22,7 +22,7 @@ def index():
     return render_template ( 'index.html' )
 
 
-@app.route ( '/movie' )
+@app.route ( '/api/movie' ,methods=['GET'])
 def movie():
     # print ( request.args )
     user_url = request.args.get ( 'user_url' )  # 返回一个list
@@ -116,7 +116,7 @@ def movie():
     # print('JSON文件保存成功！文件地址为', '文件名称为：')
 
 
-@app.route ( '/test', methods=['GET'] )
+@app.route ( '/api/test', methods=['GET'] )
 def test():  # put application's code here
     # return 'Hello World!'
     movies = 'static/movie/test.mp4'
