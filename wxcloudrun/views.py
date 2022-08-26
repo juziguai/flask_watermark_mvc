@@ -22,7 +22,7 @@ def index():
     return render_template ( 'index.html' )
 
 
-@app.route ( '/api/movie' ,methods=['GET'])
+@app.route ( '/movie' ,methods=['GET'])
 def movie():
     # print ( request.args )
     user_url = request.args.get ( 'user_url' )  # 返回一个list
