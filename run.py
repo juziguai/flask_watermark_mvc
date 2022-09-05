@@ -6,5 +6,5 @@ from wxcloudrun import app
 # 启动Flask Web服务
 if __name__ == '__main__':
     # app.run(host='192.168.3.61', port=80)
-    app.run(host='127.0.0.1', port=8080)
-    # app.run(host=sys.argv[1], port=sys.argv[2])
+    # app.run(host='127.0.0.1', port=8080)
+    app.run(host=sys.argv[1], port=sys.argv[2])
