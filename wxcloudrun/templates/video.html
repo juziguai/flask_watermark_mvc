@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>首页</title>
+    <meta name="referrer" content="never">
+    <link rel="short cut" href="../static/favicon.ico">
+</head>
+<style>
+    .container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .title {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        width: 320px;
+    }
+
+    .title1 {
+        display: flex;
+        align-items: center;
+        flex-direction: row;
+        width: 320px;
+        justify-content: center;
+    }
+
+    .count-button1 {
+        width: 90px;
+        height: 50px;
+        box-sizing: border-box;
+        margin: 16px 8px;
+        font-weight: 500;
+        font-size: 70px;
+        color: #FFFFFF;
+        letter-spacing: 1px;
+        text-align: center;
+        border-radius: 4px;
+        text-decoration: none;
+    }
+        .count-button2 {
+        width: 90px;
+        height: 50px;
+        box-sizing: border-box;
+        margin: 16px 8px;
+        font-weight: 500;
+        font-size: 17px;
+        color: #FFFFFF;
+        letter-spacing: 1px;
+        text-align: center;
+        border-radius: 4px;
+    }
+
+    .img {
+        width: 25%;
+        height: 45%;
+        border-radius: 100px;
+    }
+
+    .img_text {
+        text-align: center;
+    }
+</style>
+<body>
+<div class="container">
+
+
+    <div class="title">
+        {% if video.aa == 0 %}
+            <h1 style="color: #931f1f">解析成功！</h1>
+
+            <div class="content">
+                <div class="content">
+                    <div class="title"><img src="{{ video.url_list_png }}"
+                                            alt="" class="img"></div>
+                    <div class="img_text"><h4>{{ video.nickname }}</h4></div>
+                    <h3>标题：{{ video.video_title }}</h3>
+                </div>
+            </div>
+            <video  width="1000px" height="650px" poster="{{ video.url_list_cover }}" controls>
+                <source src="{{ video.movie|safe }}" type="video/mp4"/>
+            </video>
+            <div><a class="btn btn-success btn-lg count-button1"
+                    style="background: #07c160; border: 0" href="/">再来一个</a>
+            </div>
+        {% else %}
+            <h1 style="color: #931f1f">解析失败！{{ video.codeMsg  }}</h1>
+        {% endif %}
+    </div>
+</div>
+</body>
+</html>
