@@ -79,13 +79,13 @@ def movie():
     max_URL = jsonpath.jsonpath ( dict_data, '$...play_addr.url_list.[0]' )[0]
     # print ( '有水印URL为：', max_URL )
     video_title = jsonpath.jsonpath ( dict_data, '$..share_title' )[0]
-    print ( "视频标题为：" , video_title )
+    print ( "视频标题为：", video_title )
     video_id = jsonpath.jsonpath ( dict_data, '$..play_addr.uri' )[0]
-    print ( "视频ID为：" , video_id )
+    print ( "视频ID为：", video_id )
     video_ratio = jsonpath.jsonpath ( dict_data, '$..video.ratio' )[0]
-    print ( "视频清晰度为：" , video_ratio )
+    print ( "视频清晰度为：", video_ratio )
     nickname = jsonpath.jsonpath ( dict_data, '$..author.nickname' )[0]
-    print ( "视频作者为：" , nickname )
+    print ( "视频作者为：", nickname )
     url_list_png = jsonpath.jsonpath ( dict_data, '$..avatar_larger.url_list[0]' )[0]
     print ( "作者头像为：", url_list_png )
     url_list_cover = jsonpath.jsonpath ( dict_data, '$..cover.url_list[0]' )[0]
@@ -94,39 +94,28 @@ def movie():
     ret = re.sub ( r'playwm', "play", max_URL )
     print ( '无水印URL为：', ret )
 
-    # # 2.4 发送请求
+    # 2.4 发送请求
     # print ( '开始下载视频' )
-    # # 发送请求，获取响应内容
-    # response = requests.get ( url=ret, headers=headers )
-    # # 将响应内容存储存为变量
-    # vodeo = response.content
-    # if vodeo:
-    #     print ( '下载成功！' )
-    #     aa = 0
-    # else:
-    #     print ( "下载失败！" )
-    #     aa = 1
-    # # 3、持久化保存，可保存本地 OR 数据库
-    # # 设置保存文件路径及变量名
-    # # # 设置时间戳
-    # timec = int ( time.time () )
-    # movie_id = str ( timec ) + '.mp4'
-    # fileName = 'wxcloudrun/static/movie/' + movie_id
-    #
-    # # 进行IO操作，进行W类型，保存文件位置及保存文件的编码格式
-    # with open ( fileName, 'wb' ) as fp:
-    #     fp.write ( vodeo )
-    movie_code = 1
-    # # 打印文件信息
-    # print ( '视频保存成功！路径为', fileName )
-    # print ( '传递的视频ID为', movie_id )
+    # 发送请求，获取响应内容
+    respones = requests.get ( url=ret, headers=headers, allow_redirects=False )
+    respones_text = respones.text
+
+    # 提取字段
+    pattern = r"https://.*?80000"
+    Match = re.search ( pattern=pattern, string=respones_text )
+    Download_link = Match.group ()
+    print ( "最终下载链接为：", Download_link )
 
     data = {
-        "video_id": video_id,  # 视频ID
-        "video_ratio": video_ratio,  # 视频清晰度
+        "Download_link": Download_link,  # 最终下载链接
+        "code": "0",
         "video_title": video_title,  # 视频标题
+        "video_id": video_id,  # 视频ID为
+        "video_ratio": video_ratio,  # 视频清晰度
         "ret": ret,  # 无水印链接
-        "nickname": nickname,  # 作者
+        "nickname": nickname,  # 视频作者
+        "url_list_png": url_list_png,  # 作者头像
+        "url_list_cover": url_list_cover,  # 视频封面
     }
     video = {
         "movie": ret,
@@ -138,9 +127,8 @@ def movie():
     }
 
     # jsonify帮助转为json数据，并设置响应头 Content-Type 为 application/json
-    # return jsonify ( data )
-    # return render_template ( 'video.html', movie=ret, aa=0, video_title=video_title, nickname=nickname ,url_list_png=url_list_png,url_list_cover=url_list_cover)
-    return render_template ( 'video.html', video=video )
+    return jsonify ( data )
+    # return render_template ( 'video.html', video=video )
 
     # 3、持久化保存，保存成文件 or 写入数据库
     # respones_max_JSON = response.json()
