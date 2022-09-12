@@ -2,7 +2,8 @@ import hashlib
 import json
 import re
 import sys
-
+import time
+from random import randint
 import jsonpath
 import requests
 from flask import render_template, request, jsonify
@@ -15,6 +16,34 @@ User_Agent = tools.User_Agent
 login_errcode = tools.login_errcode
 login_errmsg = tools.login_errmsg
 
+headers = {
+    'User-Agent': User_Agent['IOS']
+}
+
+all_yuming_max = {
+    'v1-cold.douyinvod.com',
+    'v26-cold.douyinvod.com', 'v26-hon.douyinvod.com', 'v5-f-gzcm06.douyinvod.com', 'v5-gdgz-a.douyinvod.com',
+    'v93.douyinvod.com', 'v5-che.douyinvod.com', 'v6-qos-hourly.douyinvod.com', 'v26-che.douyinvod.com',
+    'v6-cold.douyinvod.com', 'v83-x.douyinvod.com', 'v5-coldb.douyinvod.com', 'v3-z.douyinvod.com',
+    'v1-x.douyinvod.com', 'v6-ab-e1.douyinvod.com', 'v5-abtest.douyinvod.com', 'v9-che.douyinvod.com',
+    'v83-y.douyinvod.com', 'v5-litea.douyinvod.com', 'v3-che.douyinvod.com', 'v29-cold.douyinvod.com',
+    'v5-lite.douyinvod.com', 'v29-qos-control.douyinvod.com', 'v5-gdgz.douyinvod.com', 'v5-ttcp-a.douyinvod.com',
+    'v3-b.douyinvod.com', 'v9-z-qos-control.douyinvod.com', 'v9-x-qos-hourly.douyinvod.com', 'v9-chc.douyinvod.com',
+    'v9-qos-hourly.douyinvod.com', 'v5-ttcp-b.douyinvod.com', 'v6-z-qos-control.douyinvod.com', 'v5-dlyd.douyinvod.com',
+    'v5-coldy.douyinvod.com', 'v3-c.douyinvod.com', 'v5-jbwl.douyinvod.com', 'v26-0015c002.douyinvod.com',
+    'v5-gdwy.douyinvod.com', 'v3-d.douyinvod.com', 'v3-p.douyinvod.com', 'v5-gdhy.douyinvod.com',
+    'v26-cold.douyinvod.com', 'v5-lite-a.douyinvod.com', 'v5-i.douyinvod.com', 'v5-g.douyinvod.com',
+    'v26-qos-daily.douyinvod.com', 'v5-dash.douyinvod.com', 'v5-h.douyinvod.com', 'v5-f.douyinvod.com',
+    'v3-a.douyinvod.com', 'v83.douyinvod.com', 'v5-cold.douyinvod.com', 'v3-y.douyinvod.com', 'v26-x.douyinvod.com',
+    'v27-ipv6.douyinvod.com', 'v9-ipv6.douyinvod.com', 'v5-yacu.douyinvod.com', 'v29-ipv6.douyinvod.com',
+    'v26-coldf.douyinvod.com', 'v5.douyinvod.com', 'v11.douyinvod.com', 'v6-z.douyinvod.com', 'v1.douyinvod.com',
+    'v9-y.douyinvod.com', 'v9-z.douyinvod.com', 'v9.douyinvod.com', 'v3-x.douyinvod.com', 'v6-y.douyinvod.com',
+    'v3-ipv6.douyinvod.com', 'v5-e.douyinvod.com', 'v3.douyinvod.com', 'v6-ipv6.douyinvod.com', 'v9-x.douyinvod.com',
+    'v6-p.douyinvod.com', 'v1-2p.douyinvod.com', 'v1-p.douyinvod.com', 'v1-ipv6.douyinvod.com', 'v24.douyinvod.com',
+    'v1-dy.douyinvod.com', 'v6.douyinvod.com', 'v6-x.douyinvod.com', 'v26-ipv6.douyinvod.com', 'v27.douyinvod.com',
+    'v92.douyinvod.com', 'v95.douyinvod.com', 'douyinvod.com', 'v26.douyinvod.com', 'v29.douyinvod.com','v5-coldc.douyinvod.com','v27-cold.douyinvod.com'
+}
+
 
 @app.route ( '/' )
 def index():
@@ -24,11 +53,55 @@ def index():
     return render_template ( 'index.html' )
 
 
+# 下载模块
+@app.route ( '/api/download', methods=['POST'] )
+def download_request():
+    print ( "进入download_request方法" )
+
+    download_url = request.json['download_url']
+    print ( '接收到的原始链接为：', download_url )
+
+    retry_count = 20
+    print ( retry_count, '次重试的机会' )
+    for i in range ( retry_count ):
+        respones_text = requests.get ( url=download_url, headers=headers, allow_redirects=False ).text
+        # print ( "原始下载链接为：", respones_text )
+        # 提取字段
+        pattern = r"https://.*?80000"
+        Match = re.search ( pattern=pattern, string=respones_text )
+        # print(Match.group())
+        Match_max = Match.group ()
+        # print ( "一次提取后为：", Match_max )
+
+        pattern_http_head = r"v.*?.douyinvod.com"
+        Download_head = re.search ( pattern=pattern_http_head, string=Match_max )
+        download_pattern = Download_head.group ()
+        print ( "二次提取后域名为：", download_pattern )
+
+        if download_pattern not in all_yuming_max:
+            print ( "匹配失败！剩余重试次数：",retry_count-i-1 )
+        else:
+            print ( '匹配成功' )
+            data = {
+                "Download_code": "ok",
+                "Download_link": Match_max
+            }
+            return jsonify ( data )
+            break
+    data = {
+        "error":"-1",
+        "error_msg": "下载链接解析失败！"
+    }
+    return jsonify(data)
+
+# time.sleep ( 1 )
+
+
+# 视频解析模块
 @app.route ( '/movie', methods=['POST'] )
 def movie():
     user_url = request.data
     user_url = request.json['user_url']
-    # user_url = request.args.get ( 'user_url' )  # 返回一个list
     print ( '接收到的原始链接为：', user_url )
     # 判断获取的值是否为空，不为流程继续
     if not user_url:
@@ -37,9 +110,7 @@ def movie():
 
     # 1、requests模块之封装请求头信息
     # 1.1 封装headers信息，UA伪装
-    headers = {
-        'User-Agent': User_Agent['IOS']
-    }
+
     # 1.2 封装URL信息
     # 1.3
     URL = re.findall ( r'https://v.douyin.com/(\w+)', user_url )[0]
@@ -95,20 +166,20 @@ def movie():
     ret = re.sub ( r'playwm', "play", max_URL )
     print ( '无水印URL为：', ret )
 
+    # 发送请求
     # 2.4 发送请求
     # print ( '开始下载视频' )
     # 发送请求，获取响应内容
-    respones = requests.get ( url=ret, headers=headers, allow_redirects=False )
-    respones_text = respones.text
-
+    respones_text = requests.get ( url=ret, headers=headers, allow_redirects=False ).text
     # 提取字段
     pattern = r"https://.*?80000"
     Match = re.search ( pattern=pattern, string=respones_text )
-    Download_link = Match.group ()
-    print ( "最终下载链接为：", Download_link )
+    # print(Match.group())
+    Match_max = Match.group ()
+    print ( "视频链接为：", Match_max )
 
     data = {
-        "Download_link": Download_link,  # 最终下载链接
+        "Download_link": Match_max,  # 最终下载链接
         "code": "0",
         "video_title": video_title,  # 视频标题
         "video_id": video_id,  # 视频ID为
