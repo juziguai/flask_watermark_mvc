@@ -24,10 +24,11 @@ def index():
     return render_template ( 'index.html' )
 
 
-@app.route ( '/movie', methods=['GET'] )
+@app.route ( '/movie', methods=['POST'] )
 def movie():
-    # print ( request.args )
-    user_url = request.args.get ( 'user_url' )  # 返回一个list
+    user_url = request.data
+    user_url = request.json['user_url']
+    # user_url = request.args.get ( 'user_url' )  # 返回一个list
     print ( '接收到的原始链接为：', user_url )
     # 判断获取的值是否为空，不为流程继续
     if not user_url:
@@ -43,7 +44,7 @@ def movie():
     # 1.3
     URL = re.findall ( r'https://v.douyin.com/(\w+)', user_url )[0]
     min_url = 'https://v.douyin.com/' + URL
-    # print ( '解析后链接：', min_url )
+    print ( '解析后链接：', min_url )
     # 1.4 发送URL请求
     # allow_redirects：是否允许重定向；False,禁止重定向
     respones = requests.get ( url=min_url, headers=headers, allow_redirects=False )
